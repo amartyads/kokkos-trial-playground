@@ -3,7 +3,7 @@
 
 #include <Kokkos_Core.hpp>
 
-#include <moleculecontainer_parallel.hpp>
+#include <moleculecontainer_parallel_benching.hpp>
 
 int main(int argc, char* argv[])
 {

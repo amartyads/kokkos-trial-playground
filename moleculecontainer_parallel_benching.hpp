@@ -1,5 +1,6 @@
 #include <random>
 #include <iostream>
+#include <chrono>
 #include <vector>
 #include <algorithm>
 #include <numeric>
@@ -10,13 +11,13 @@ class MoleculeContainer
 {
 public:
     MoleculeContainer(int numCells, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCells(numCells), _cellSize(cellSize), _gen(gen), 
-        _dis(dis), _moleculeData("moleculeData", numCells, cellSize) {}
+        _dis(dis), moleculeData("moleculeData", numCells, cellSize) {}
 
     void grow(int cellSize)
     {
         assert(_cellSize <= cellSize);
         _cellSize = cellSize;
-        Kokkos::resize(_moleculeData,_numCells, _cellSize);
+        Kokkos::resize(moleculeData,_numCells, _cellSize);
     }
 
     void printData() const
@@ -27,7 +28,7 @@ public:
             std::cout << "Cell #" << i << ": " ;
             for (size_t j = 0; j < _cellSize; j++)
             {
-                std::cout << _moleculeData(i,j) << " ";
+                std::cout << moleculeData(i,j) << " ";
             }
             std::cout << std::endl;
         }
@@ -40,12 +41,12 @@ public:
         {
             for (size_t j = 0; j < _cellSize; j++)
             {
-                _moleculeData(i,j) = _dis(_gen) % 9 + 1;
+                moleculeData(i,j) = _dis(_gen) % 9 + 1;
             }
         }
     }
 
-    void makeRandomHoles()
+    void makeRandomHoles(bool display = false)
     {
         int numHoles = _dis(_gen) % (_numCells*_cellSize);
         std::vector<int> allCoords(_numCells*_cellSize);
@@ -53,15 +54,16 @@ public:
         std::shuffle(allCoords.begin(), allCoords.end(),_gen);
         for (size_t i = 0; i < numHoles; i++)
         {
-            _moleculeData(allCoords[i]/_cellSize, allCoords[i]%_cellSize) = 0;
+            moleculeData(allCoords[i]/_cellSize, allCoords[i]%_cellSize) = 0;
         }
-        std::cout << numHoles << " holes created!" << std::endl;
+        if(display) std::cout << numHoles << " holes created!" << std::endl;
     }
 
-    void compactor_onesweep()
+    long compactor_onesweep(bool display = false)
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
+        auto t1 = std::chrono::high_resolution_clock::now();
         Kokkos::parallel_for(_numCells, KOKKOS_LAMBDA(const unsigned int i)
         {
             int j = 0;
@@ -84,22 +86,28 @@ public:
                 }
             }
         }); //kokkos parallel for
-        std::cout << "Data compacted with onesweep! Data:" << std::endl;
-        for (size_t i = 0; i < _numCells; i++)
+        auto t2 = std::chrono::high_resolution_clock::now();
+        if(display)
         {
-            std::cout << "Cell #" << i << ": " ;
-            for (size_t j = 0; j < _cellSize; j++)
+            std::cout << "Data compacted with onesweep! Data:" << std::endl;
+            for (size_t i = 0; i < _numCells; i++)
             {
-                std::cout << containerCopy(i,j) << " ";
+                std::cout << "Cell #" << i << ": " ;
+                for (size_t j = 0; j < _cellSize; j++)
+                {
+                    std::cout << containerCopy(i,j) << " ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
         }
+        return std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
     }
 
-    void compactor_twosweep()
+    long compactor_twosweep(bool display = false)
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
+        auto t1 = std::chrono::high_resolution_clock::now();
         Kokkos::parallel_for(_numCells, KOKKOS_LAMBDA(const unsigned int i)
         {
             int shiftAmt[_cellSize];
@@ -121,22 +129,28 @@ public:
                 }
             }
         }); //kokkos parallel for
-        std::cout << "Data compacted with twosweep! Data:" << std::endl;
-        for (size_t i = 0; i < _numCells; i++)
+        auto t2 = std::chrono::high_resolution_clock::now();
+        if(display)
         {
-            std::cout << "Cell #" << i << ": " ;
-            for (size_t j = 0; j < _cellSize; j++)
+            std::cout << "Data compacted with twosweep! Data:" << std::endl;
+            for (size_t i = 0; i < _numCells; i++)
             {
-                std::cout << containerCopy(i,j) << " ";
+                std::cout << "Cell #" << i << ": " ;
+                for (size_t j = 0; j < _cellSize; j++)
+                {
+                    std::cout << containerCopy(i,j) << " ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
         }
+        return std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
     }
 
-    void compactor_pullback()
+    long compactor_pullback(bool display = false)
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
+        auto t1 = std::chrono::high_resolution_clock::now();
         Kokkos::parallel_for(_numCells, KOKKOS_LAMBDA(const unsigned int i)
         {
             int sourceIdx[_cellSize];
@@ -156,22 +170,28 @@ public:
                     containerCopy(i, j) = 0;
             }
         }); //kokkos parallel for
-        std::cout << "Data compacted with pullback! Data:" << std::endl;
-        for (size_t i = 0; i < _numCells; i++)
+        auto t2 = std::chrono::high_resolution_clock::now();
+        if(display)
         {
-            std::cout << "Cell #" << i << ": " ;
-            for (size_t j = 0; j < _cellSize; j++)
+            std::cout << "Data compacted with pullback! Data:" << std::endl;
+            for (size_t i = 0; i < _numCells; i++)
             {
-                std::cout << containerCopy(i,j) << " ";
+                std::cout << "Cell #" << i << ": " ;
+                for (size_t j = 0; j < _cellSize; j++)
+                {
+                    std::cout << containerCopy(i,j) << " ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
         }
+        return std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
     }
 
-    void compactor_onesweep_noOrder()
+    long compactor_onesweep_noOrder(bool display = false)
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
+        auto t1 = std::chrono::high_resolution_clock::now();
         //Kokkos::RangePolicy<Kokkos::Schedule<Kokkos::Static>> rp(0, _numCells, Kokkos::ChunkSize(_cellSize));
         Kokkos::parallel_for(_numCells, KOKKOS_LAMBDA(const unsigned int i)
         {
@@ -187,16 +207,21 @@ public:
                 containerCopy(i,k) = 0;
             }
         }); //kokkos parallel for
-        std::cout << "Data compacted with onesweep_noOrder! Data:" << std::endl;
-        for (size_t i = 0; i < _numCells; i++)
+        auto t2 = std::chrono::high_resolution_clock::now();
+        if(display)
         {
-            std::cout << "Cell #" << i << ": " ;
-            for (size_t j = 0; j < _cellSize; j++)
+            std::cout << "Data compacted with onesweep_noOrder! Data:" << std::endl;
+            for (size_t i = 0; i < _numCells; i++)
             {
-                std::cout << containerCopy(i,j) << " ";
+                std::cout << "Cell #" << i << ": " ;
+                for (size_t j = 0; j < _cellSize; j++)
+                {
+                    std::cout << containerCopy(i,j) << " ";
+                }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
         }
+        return std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count();
     }
 
 
@@ -205,5 +230,5 @@ private:
     int _cellSize;
     std::mt19937 _gen;
     std::uniform_int_distribution<> _dis;
-    Kokkos::View<int**> _moleculeData;
+    Kokkos::View<int**> moleculeData;
 };

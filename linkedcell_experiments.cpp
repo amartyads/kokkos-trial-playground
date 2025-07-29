@@ -11,13 +11,13 @@ class MoleculeContainer
 {
 public:
     MoleculeContainer(int numCells, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCells(numCells), _cellSize(cellSize), _gen(gen), 
-        _dis(dis), _moleculeData("moleculeData", numCells, cellSize) {}
+        _dis(dis), moleculeData("moleculeData", numCells, cellSize) {}
 
     void grow(int cellSize)
     {
         assert(_cellSize <= cellSize);
         _cellSize = cellSize;
-        Kokkos::resize(_moleculeData,_numCells, _cellSize);
+        Kokkos::resize(moleculeData,_numCells, _cellSize);
     }
 
     void printData() const
@@ -28,7 +28,7 @@ public:
             std::cout << "Cell #" << i << ": " ;
             for (size_t j = 0; j < _cellSize; j++)
             {
-                std::cout << _moleculeData(i,j) << " ";
+                std::cout << moleculeData(i,j) << " ";
             }
             std::cout << std::endl;
         }
@@ -41,7 +41,7 @@ public:
         {
             for (size_t j = 0; j < _cellSize; j++)
             {
-                _moleculeData(i,j) = _dis(_gen) % 9 + 1;
+                moleculeData(i,j) = _dis(_gen) % 9 + 1;
             }
         }
     }
@@ -54,7 +54,7 @@ public:
         std::shuffle(allCoords.begin(), allCoords.end(),_gen);
         for (size_t i = 0; i < numHoles; i++)
         {
-            _moleculeData(allCoords[i]/_cellSize, allCoords[i]%_cellSize) = 0;
+            moleculeData(allCoords[i]/_cellSize, allCoords[i]%_cellSize) = 0;
         }
         std::cout << numHoles << " holes created!" << std::endl;
     }
@@ -62,7 +62,7 @@ public:
     void compactor_onesweep()
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
         for(int i = 0; i < _numCells; i++)
         {
             int j = 0;
@@ -100,7 +100,7 @@ public:
     void compactor_twosweep()
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
         for(int i = 0; i < _numCells; i++)
         {
             int shiftAmt[_cellSize];
@@ -137,7 +137,7 @@ public:
     void compactor_pullback()
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
         for(int i = 0; i < _numCells; i++)
         {
             int sourceIdx[_cellSize];
@@ -172,7 +172,7 @@ public:
     void compactor_onesweep_noOrder()
     {
         Kokkos::View<int**> containerCopy("copy", _numCells, _cellSize);
-        Kokkos::deep_copy(containerCopy, _moleculeData);
+        Kokkos::deep_copy(containerCopy, moleculeData);
         for(int i = 0; i < _numCells; i++)
         {
             int j = 0, k = _cellSize;
@@ -205,7 +205,7 @@ private:
     int _cellSize;
     std::mt19937 _gen;
     std::uniform_int_distribution<> _dis;
-    Kokkos::View<int**> _moleculeData;
+    Kokkos::View<int**> moleculeData;
 };
 
 int main(int argc, char* argv[])
