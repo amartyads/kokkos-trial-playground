@@ -18,7 +18,7 @@ class MoleculeContainer
 {
 public:
     MoleculeContainer(int numCells, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCells(numCells), _cellSize(cellSize), _gen(gen), 
-        _dis(dis), moleculeData("moleculeData", numCells, cellSize), linkedCellData("linkedCellData", numCells) {}
+        _dis(dis), moleculeData("moleculeData", numCells, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCells) {}
 
     void grow(int cellSize)
     {
@@ -30,32 +30,32 @@ public:
 
     void insert(int cellIdx, Molecule& molecule)
     {
-        moleculeData(cellIdx, linkedCellData(cellIdx).numMolecules) = molecule;
-        linkedCellData(cellIdx).numMolecules += 1;
+        moleculeData(cellIdx, linkedCellNumMolecules(cellIdx)) = molecule;
+        linkedCellNumMolecules(cellIdx) += 1;
     }
 
     void remove(int cellIdx, int moleculeIdx)
     {
-        moleculeData(cellIdx, moleculeIdx) = moleculeData(cellIdx, linkedCellData(cellIdx).numMolecules - 1);
-        linkedCellData(cellIdx).numMolecules -= 1;
+        moleculeData(cellIdx, moleculeIdx) = moleculeData(cellIdx, linkedCellNumMolecules(cellIdx) - 1);
+        linkedCellNumMolecules(cellIdx)-= 1;
     }
 
     void clearLinkedCell(int cellIdx)
     {
-        linkedCellData(cellIdx).numMolecules = 0;
+        linkedCellNumMolecules(cellIdx) = 0;
     }
 
     void sort(int cellIdx, IndexConverter& indexConverter) //set all outgoing molecules
     {
-        for (size_t i = 0; i < linkedCellData(cellIdx).numMolecules; i++)
+        for (size_t i = 0; i < linkedCellNumMolecules(cellIdx); i++)
         {
             int curMolIdx = indexConverter.getIndex(moleculeData(cellIdx, i).pos);
             if(curMolIdx != cellIdx) // if molecule does not belong to current cell anymore
             {
                 // write data to target end
-                moleculeData(curMolIdx, linkedCellData(curMolIdx).numMolecules) = moleculeData(cellIdx, i);
+                moleculeData(curMolIdx, linkedCellNumMolecules(curMolIdx)) = moleculeData(cellIdx, i);
                 // increment target end
-                linkedCellData(curMolIdx).numMolecules++;
+                linkedCellNumMolecules(curMolIdx)++;
                 // delete molecule at own position
                 remove(cellIdx, i);
                 // decrement iterator as the molecule at position i is now new
@@ -73,7 +73,7 @@ public:
             {
                 for (size_t x = 0; x < 2; x++)
                 {
-                    int lengthVector[] = {}
+                    int lengthVector[] = {};
                 }
                 
             }
@@ -89,7 +89,7 @@ public:
         {
             std::cout << std::endl;
             std::cout << "Cell #" << i << ": " ;
-            for (size_t j = 0; j < linkedCellData(i).numMolecules; j++)
+            for (size_t j = 0; j < linkedCellNumMolecules(i); j++)
             {
                 std::cout << std::endl;
                 std::cout << moleculeData(i,j).to_string() << " ";
@@ -108,7 +108,7 @@ public:
                 Molecule m(_dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize,_dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize);
                 moleculeData(i,j) = m;
             }
-            linkedCellData(i).numMolecules = _cellSize;
+            linkedCellNumMolecules(i)= _cellSize;
         }
     }
 
@@ -126,8 +126,6 @@ public:
     }
 
     Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
-
-    LinkedCell& getLinkedCellAt(int i) const { return linkedCellData(i); }
 
     void compact(bool display = false)
     {
@@ -160,8 +158,15 @@ public:
         }
     }
 
+    LinkedCell operator[](int idx)
+    {
+        Kokkos::View<Molecule*> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
+        Kokkos::View<int> lcSizeSlice(linkedCellNumMolecules, idx);
+        return LinkedCell(lcSizeSlice, lcMoleculeSlice);
+    }
+
     Kokkos::View<Molecule**> moleculeData;
-    Kokkos::View<LinkedCell*> linkedCellData;
+    Kokkos::View<int*> linkedCellNumMolecules;
 
 private:
     int _numCells;

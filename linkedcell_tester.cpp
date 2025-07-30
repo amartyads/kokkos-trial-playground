@@ -34,6 +34,12 @@ int main(int argc, char* argv[])
         container.sort(i, indexConverter);
     
     container.printData();
+
+    std::cout << "Iteration: " << std::endl;
+    LinkedCell cell = container[0];
+    for(auto x: cell)
+        std::cout << x.to_string() << " ";
+    std::cout << std::endl;
     //container.compact();
     //container.printData();
 
