@@ -137,8 +137,8 @@ public:
 
     int getNumCells() const { return _numCells; }
 
-    Kokkos::View<Molecule**> moleculeData;
-    Kokkos::View<int*> linkedCellNumMolecules;
+    Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeData;
+    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> linkedCellNumMolecules;
 
 private:
     int _numCells;
