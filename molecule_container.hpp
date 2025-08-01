@@ -128,7 +128,7 @@ public:
 
     Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
 
-    LinkedCell operator[](int idx)
+    LinkedCell operator[](int idx) const
     {
         Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
         Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);

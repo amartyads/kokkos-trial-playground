@@ -52,11 +52,15 @@ int main(int argc, char* argv[])
 
     Molecule m(50,0.5,0.5,0.5);
     cell.insert(m);
-    m.pos[1] = 1.5;
-    container.printData();
 
-    //container.compact();
-    //container.printData();
+    std::cout << "fence--------------------" << std::endl;
+    Kokkos::parallel_for(totNumCells, KOKKOS_LAMBDA(const unsigned int i)
+    {
+        LinkedCell curCell = container[i];
+        for (auto it = curCell.begin(); it != curCell.end(); ++it)
+            (*it).f[0] = 69420;
+    });
+    container.printData();
 
     return 0;
 }
