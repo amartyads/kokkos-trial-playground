@@ -13,38 +13,60 @@ class LinkedCell
 {
 public:
     LinkedCell(Kokkos::View<int> nMolecules, Kokkos::View<Molecule*> moleculeSlice) 
-        : numMolecules(nMolecules), molecules(moleculeSlice) {}
+        : numMolecules(nMolecules), moleculeData(moleculeSlice) {}
     
-    struct Iterator
+    class Iterator
     {
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::bidirectional_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = Molecule;
         using pointer = value_type*;
         using reference = value_type&;
 public:
-        Iterator(pointer ptr) : _myPtr(ptr) {}
+        Iterator(pointer ptr) : _myPtr(ptr), _idx(0) {}
 
         reference operator*() const { return *_myPtr;} 
         pointer operator->() { return _myPtr; }
-        Iterator& operator++() { _myPtr++; return *this; }
-        Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
+        Iterator& operator++() { _myPtr++; _idx++; return *this; }
+        Iterator operator++(int) { Iterator temp = *this; ++(*this); _idx++; return temp; }
+        Iterator& operator--() { _myPtr--; _idx--; return *this; }
+        Iterator operator--(int) { Iterator temp = *this; --(*this); _idx--; return temp; }
         
         friend bool operator== (const Iterator& a, const Iterator& b) { return a._myPtr == b._myPtr; }
         friend bool operator!= (const Iterator& a, const Iterator& b) { return a._myPtr != b._myPtr; }
 
+        unsigned int getIndex() const { return _idx; }
+
 private:
         pointer _myPtr;
+        unsigned int _idx;
     };
 
-    Iterator begin() { return Iterator(&molecules(0)); }
-    Iterator end() { return Iterator(&molecules(numMolecules())); }
+    Iterator begin() { return Iterator(&moleculeData(0)); }
+    Iterator end() { return Iterator(&moleculeData(numMolecules())); }
+
+    void insert(Molecule& molecule)
+    {
+        moleculeData(numMolecules()) = molecule;
+        numMolecules() += 1;
+    }
+    void remove(int moleculeIdx)
+    {
+        moleculeData(moleculeIdx) = moleculeData(numMolecules() - 1);
+        numMolecules() -= 1;
+    }
+    void clear()
+    {
+        numMolecules() = 0;
+    }
+
     std::string to_string() const
     {
         std::stringstream to_ret;
         to_ret << " numMol: " << numMolecules() << std::endl;
         return to_ret.str();
     }
+
     Kokkos::View<int> numMolecules;
-    Kokkos::View<Molecule*> molecules;
+    Kokkos::View<Molecule*> moleculeData;
 };

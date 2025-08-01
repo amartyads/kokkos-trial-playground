@@ -18,7 +18,8 @@ class MoleculeContainer
 {
 public:
     MoleculeContainer(int numCells, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCells(numCells), _cellSize(cellSize), _gen(gen), 
-        _dis(dis), moleculeData("moleculeData", numCells, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCells) {}
+        _dis(dis), moleculeData("moleculeData", numCells, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCells)
+        {}
 
     void grow(int cellSize)
     {
@@ -37,7 +38,7 @@ public:
     void remove(int cellIdx, int moleculeIdx)
     {
         moleculeData(cellIdx, moleculeIdx) = moleculeData(cellIdx, linkedCellNumMolecules(cellIdx) - 1);
-        linkedCellNumMolecules(cellIdx)-= 1;
+        linkedCellNumMolecules(cellIdx) -= 1;
     }
 
     void clearLinkedCell(int cellIdx)
@@ -105,7 +106,7 @@ public:
         {
             for (size_t j = 0; j < _cellSize; j++)
             {
-                Molecule m(_dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize,_dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize);
+                Molecule m((i*_cellSize + j), _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize,_dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize, _dis(_gen) % domainSize);
                 moleculeData(i,j) = m;
             }
             linkedCellNumMolecules(i)= _cellSize;
@@ -127,43 +128,14 @@ public:
 
     Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
 
-    void compact(bool display = false)
-    {
-        //Kokkos::RangePolicy<Kokkos::Schedule<Kokkos::Static>> rp(0, _numCells, Kokkos::ChunkSize(_cellSize));
-        Kokkos::parallel_for(_numCells, KOKKOS_LAMBDA(const unsigned int i)
-        {
-            int j = 0, k = _cellSize - 1;
-            while(j < k)
-            {
-                //find first hole on left side
-                while(j < _cellSize && !moleculeData(i,j).dirty) j++;
-                //find first data on right side
-                while(k > -1 && moleculeData(i,k).dirty) k--;
-                if(k <= j) break;
-                moleculeData(i,j) = moleculeData(i,k);
-            }
-        }); //kokkos parallel for
-        if(display)
-        {
-            std::cout << "Data compacted with onesweep_noOrder! Data:" << std::endl;
-            for (size_t i = 0; i < _numCells; i++)
-            {
-                std::cout << "Cell #" << i << ": " ;
-                for (size_t j = 0; j < _cellSize; j++)
-                {
-                    std::cout << moleculeData(i,j).to_string() << " ";
-                }
-                std::cout << std::endl;
-            }
-        }
-    }
-
     LinkedCell operator[](int idx)
     {
         Kokkos::View<Molecule*> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
         Kokkos::View<int> lcSizeSlice(linkedCellNumMolecules, idx);
         return LinkedCell(lcSizeSlice, lcMoleculeSlice);
     }
+
+    int getNumCells() const { return _numCells; }
 
     Kokkos::View<Molecule**> moleculeData;
     Kokkos::View<int*> linkedCellNumMolecules;

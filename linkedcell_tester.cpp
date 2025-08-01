@@ -40,6 +40,21 @@ int main(int argc, char* argv[])
     for(auto x: cell)
         std::cout << x.to_string() << " ";
     std::cout << std::endl;
+    LinkedCell::Iterator it = container[0].begin();
+    it++;
+    it++;
+    (*it).pos[0] = 1;
+    (*it).pos[1] = 1;
+    (*it).pos[2] = 1;
+    for(int i = 0 ; i < totNumCells; i++)
+        container.sort(i, indexConverter);
+    container.printData();
+
+    Molecule m(50,0.5,0.5,0.5);
+    cell.insert(m);
+    m.pos[1] = 1.5;
+    container.printData();
+
     //container.compact();
     //container.printData();
 

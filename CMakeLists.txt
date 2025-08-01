@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(MyProject)
 
-set(Kokkos_COMMON_SOURCE_DIR /home/amartya/software/kokkos-4.6.02/install)
+set(Kokkos_COMMON_SOURCE_DIR $HOME/software/kokkos-4.6.02/install)
 
 find_package(Kokkos CONFIG)
 
