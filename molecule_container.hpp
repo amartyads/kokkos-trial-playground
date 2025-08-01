@@ -130,8 +130,8 @@ public:
 
     LinkedCell operator[](int idx)
     {
-        Kokkos::View<Molecule*> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
-        Kokkos::View<int> lcSizeSlice(linkedCellNumMolecules, idx);
+        Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
+        Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
         return LinkedCell(lcSizeSlice, lcMoleculeSlice);
     }
 
