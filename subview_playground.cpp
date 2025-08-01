@@ -3,7 +3,7 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_StdAlgorithms.hpp>
 
-void print(Kokkos::View<int**, Kokkos::SharedSpace> &a)
+void print(Kokkos::View<int**, Kokkos::LayoutRight, Kokkos::SharedSpace> &a)
 {
     std::cout << "Contents: ";
     for (size_t i = 0; i < a.extent(0); i++)
@@ -17,7 +17,7 @@ void print(Kokkos::View<int**, Kokkos::SharedSpace> &a)
     std::cout << std::endl;
 }
 
-void print(Kokkos::View<int*, Kokkos::SharedSpace> &a)
+void print(Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> &a)
 {
     std::cout << "Contents: ";
     for (size_t i = 0; i < a.size(); i++)
@@ -30,13 +30,13 @@ void print(Kokkos::View<int*, Kokkos::SharedSpace> &a)
 int main(int argc, char* argv[])
 {
     Kokkos::ScopeGuard guard(argc, argv);
-    Kokkos::View<int**, Kokkos::SharedSpace> nums("nums",10,10);
+    Kokkos::View<int**, Kokkos::LayoutRight, Kokkos::SharedSpace> nums("nums",10,10);
     for (size_t i = 0; i < 100; i++)
     {
         nums((i/10), (i%10)) = i;
     }
     print(nums);
-    Kokkos::View<int*, Kokkos::SharedSpace> num(nums, 4, Kokkos::ALL);
+    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> num(nums, 4, Kokkos::ALL);
     print(num);
     num(6) = 200;
     print(num);
