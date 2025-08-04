@@ -20,23 +20,20 @@ int main(int argc, char* argv[])
     int domainSizeVolume = 2;
     double cellSizeVolume = 1;
     int numCellsPerDim = static_cast<int>(domainSizeVolume/cellSizeVolume);
-    int totNumCells = numCellsPerDim * numCellsPerDim * numCellsPerDim;
+    //int totNumCells = numCellsPerDim * numCellsPerDim * numCellsPerDim;
     int cellSizeMolecules = 2;
     int extraCellSpaceFactor = 3;
 
     IndexConverter indexConverter(domainSizeVolume, numCellsPerDim);
     MoleculeContainer container(numCellsPerDim, cellSizeMolecules, gen, dis);
 
+    std::cout << "index of 0.5,0.5,0.5: " << indexConverter.getIndex(0.5,0.5,0.5) << std::endl;
+    std::cout << "index of 1.5,1.5,1.5: " << indexConverter.getIndex(1.5,1.5,1.5) << std::endl;
+
     container.populateRandomly(domainSizeVolume); 
     container.printData();
     container.grow(cellSizeMolecules * extraCellSpaceFactor);
     container.sort(indexConverter);
-
-    /*for (size_t i = 0; i < totNumCells; i++)
-    {
-        container.sort(i, indexConverter);
-    }*/
-
     container.printData();
 
     /**std::cout << "Iteration: " << std::endl;

@@ -1,44 +1,30 @@
 #pragma once
 
-#include <vector>
+#include <iostream>
 
 class IndexConverter
 {
 public:
-    IndexConverter(int domainSize, int numCellsPerDim) : domainSize(domainSize), numCellsPerDim(numCellsPerDim) 
-    {
-        for(double i = domainSize/numCellsPerDim; i <= domainSize; i+= domainSize/numCellsPerDim)
-        {
-            xspans.push_back(i);
-            yspans.push_back(i);
-            zspans.push_back(i);
-        }
-    }
+    IndexConverter(int domainSize, int numCellsPerDim) : domainSize(domainSize), numCellsPerDim(numCellsPerDim) {}
     IndexConverter() : domainSize(0), numCellsPerDim(0) {}
     void reset(int domainSize, int numCellsPerDim)
     {
         this->domainSize = domainSize;
         this->numCellsPerDim = numCellsPerDim;
-        xspans.clear();
-        yspans.clear();
-        zspans.clear();
-        for(double i = domainSize/numCellsPerDim; i <= domainSize; i+= domainSize/numCellsPerDim)
-        {
-            xspans.push_back(i);
-            yspans.push_back(i);
-            zspans.push_back(i);
-        }
     }
-    KOKKOS_FUNCTION int getIndex(double posx, double posy, double posz) const
+    int getIndex(double posx, double posy, double posz) const
     {
-        int toRet = 0;
         int xid = -1, yid = -1, zid = -1;
-        for(int i = 0; i < xspans.size(); i++)
+        posx -= (domainSize/numCellsPerDim);
+        posy -= (domainSize/numCellsPerDim);
+        posz -= (domainSize/numCellsPerDim);
+        int i = 0;
+        while(xid == -1 || yid == -1 || zid == -1)
         {
-            if(xid == -1 && posx < xspans[i]) xid = i;
-            if(yid == -1 && posy < yspans[i]) yid = i;
-            if(zid == -1 && posz < zspans[i]) zid = i;
-            if(xid != -1 && yid != -1 && zid != -1) break;
+            if(xid == -1 && posx < 0) xid = i; else posx -= (domainSize/numCellsPerDim);
+            if(yid == -1 && posy < 0) yid = i; else posy -= (domainSize/numCellsPerDim);
+            if(zid == -1 && posz < 0) zid = i; else posz -= (domainSize/numCellsPerDim);
+            i++;
         }
         return xid + yid*numCellsPerDim + zid*numCellsPerDim*numCellsPerDim;
     }
@@ -55,5 +41,4 @@ public:
         return isInIndex(pos[0], pos[1], pos[2], index);
     }
     int domainSize, numCellsPerDim;
-    std::vector<double> xspans, yspans, zspans;
 };
