@@ -46,7 +46,7 @@ public:
         linkedCellNumMolecules(cellIdx) = 0;
     }
 
-    KOKKOS_FUNCTION void sort(const IndexConverter& indexConverter)
+    void sort(const IndexConverter& indexConverter)
     {
         //find red-black cells
         for (int z = 0; z < 2; z++)
