@@ -29,13 +29,13 @@ public:
         // new space created is filled with garbage data, so size of _linkedCell does not change
     }
 
-    KOKKOS_FUNCTION void insert(int cellIdx, Molecule& molecule)
+    KOKKOS_INLINE_FUNCTION void insert(int cellIdx, Molecule& molecule)
     {
         moleculeData(cellIdx, linkedCellNumMolecules(cellIdx)) = molecule;
         linkedCellNumMolecules(cellIdx) += 1;
     }
 
-    KOKKOS_FUNCTION void remove(int cellIdx, int moleculeIdx)
+    KOKKOS_INLINE_FUNCTION void remove(int cellIdx, int moleculeIdx)
     {
         moleculeData(cellIdx, moleculeIdx) = moleculeData(cellIdx, linkedCellNumMolecules(cellIdx) - 1);
         linkedCellNumMolecules(cellIdx) -= 1;
@@ -60,6 +60,7 @@ public:
                     const int length = lengthVector[0] * lengthVector[1] * lengthVector[2];
                     const int numCellsPerDim = _numCellsPerDim;
                     auto linkedCellLocal(linkedCellNumMolecules);
+                    auto moleculeDataLocal(moleculeData);
                     Kokkos::parallel_for(length, KOKKOS_LAMBDA(const unsigned int j) {
                         // compute index of the current cell
                         int index = 0;
@@ -82,13 +83,13 @@ public:
 
                         for (size_t i = 0; i < linkedCellLocal(index); i++)
                         {
-                            int curMolIdx = indexConverter.getIndex(moleculeData(index, i).pos);
+                            int curMolIdx = indexConverter.getIndex(moleculeDataLocal(index, i).pos);
                             if(curMolIdx != index) // if molecule does not belong to current cell anymore
                             {
                                 // write data to target end
-                                moleculeData(curMolIdx, linkedCellNumMolecules(curMolIdx)) = moleculeData(index, i);
+                                moleculeDataLocal(curMolIdx, linkedCellLocal(curMolIdx)) = moleculeDataLocal(index, i);
                                 // increment target end
-                                linkedCellNumMolecules(curMolIdx)++;
+                                linkedCellLocal(curMolIdx)++;
                                 // delete molecule at own position
                                 remove(index, i);
                                 // decrement iterator as the molecule at position i is now new
