@@ -97,7 +97,21 @@ public:
                         // compute contribution for last dimension
                         index += (0 + 2 * helpIndex1 + x);
 
-                        sort(index, indexConverter);
+                        for (size_t i = 0; i < linkedCellNumMolecules(index); i++)
+                        {
+                            int curMolIdx = indexConverter.getIndex(moleculeData(index, i).pos);
+                            if(curMolIdx != index) // if molecule does not belong to current cell anymore
+                            {
+                                // write data to target end
+                                moleculeData(curMolIdx, linkedCellNumMolecules(curMolIdx)) = moleculeData(index, i);
+                                // increment target end
+                                linkedCellNumMolecules(curMolIdx)++;
+                                // delete molecule at own position
+                                remove(index, i);
+                                // decrement iterator as the molecule at position i is now new
+                                i--;
+                            }
+                        }
                     });
                 }
             }
