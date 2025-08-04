@@ -77,7 +77,7 @@ public:
                     const int lengthVector[3] = {(_numCellsPerDim + (_numCellsPerDim % 2) * (x == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (y == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (z == 0)) / 2};
                     const int length = lengthVector[0] * lengthVector[1] * lengthVector[2];
                     const int numCellsPerDim = _numCellsPerDim;
-                    Kokkos::parallel_for(length, KOKKOS_LAMBDA(const unsigned int j) {
+                    Kokkos::parallel_for("sortMoleculeContainer", length, KOKKOS_LAMBDA(const unsigned int j) {
                         // compute index of the current cell
                         int index = 0;
                         int helpIndex1 = j;
