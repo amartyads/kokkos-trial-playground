@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
     container.printData();
     container.grow(cellSizeMolecules * extraCellSpaceFactor);
     container.sort(indexConverter);
+    Kokkos::fence();
     container.printData();
 
     /**std::cout << "Iteration: " << std::endl;
