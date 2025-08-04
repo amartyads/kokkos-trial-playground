@@ -46,7 +46,7 @@ public:
         linkedCellNumMolecules(cellIdx) = 0;
     }
 
-    KOKKOS_FUNCTION void sort(int cellIdx, const IndexConverter& indexConverter) //set all outgoing molecules
+    KOKKOS_INLINE_FUNCTION void sort(int cellIdx, const IndexConverter& indexConverter) //set all outgoing molecules
     {
         for (size_t i = 0; i < linkedCellNumMolecules(cellIdx); i++)
         {
@@ -76,6 +76,7 @@ public:
                 {
                     const int lengthVector[3] = {(_numCellsPerDim + (_numCellsPerDim % 2) * (x == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (y == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (z == 0)) / 2};
                     const int length = lengthVector[0] * lengthVector[1] * lengthVector[2];
+                    const int numCellsPerDim = _numCellsPerDim;
                     Kokkos::parallel_for(length, KOKKOS_LAMBDA(const unsigned int j) {
                         // compute index of the current cell
                         int index = 0;
@@ -86,13 +87,13 @@ public:
                         // save rest of index in helpIndex1
                         helpIndex1 = helpIndex1 - helpIndex2 * (lengthVector[0] * lengthVector[1]);
                         // compute contribution to index
-                        index += (0+ 2 * helpIndex2 + z) * _numCellsPerDim * _numCellsPerDim;
+                        index += (0+ 2 * helpIndex2 + z) * numCellsPerDim * numCellsPerDim;
                         // determine plane within traversed block
                         helpIndex2 = helpIndex1 / lengthVector[0];
                         // save rest of index in helpIndex1
                         helpIndex1 = helpIndex1 - helpIndex2 * lengthVector[0];
                         // compute contribution to index
-                        index += (0 + 2 * helpIndex2 + y) * _numCellsPerDim;
+                        index += (0 + 2 * helpIndex2 + y) * numCellsPerDim;
                         // compute contribution for last dimension
                         index += (0 + 2 * helpIndex1 + x);
 
