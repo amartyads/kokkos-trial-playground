@@ -67,6 +67,6 @@ private:
         return to_ret.str();
     }
 
-    Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> numMolecules;
-    Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeData;
+    Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> numMolecules;
+    Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> moleculeData;
 };
