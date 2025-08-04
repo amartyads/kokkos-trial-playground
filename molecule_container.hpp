@@ -46,25 +46,6 @@ public:
         linkedCellNumMolecules(cellIdx) = 0;
     }
 
-    KOKKOS_INLINE_FUNCTION void sort(int cellIdx, const IndexConverter& indexConverter) //set all outgoing molecules
-    {
-        for (size_t i = 0; i < linkedCellNumMolecules(cellIdx); i++)
-        {
-            int curMolIdx = indexConverter.getIndex(moleculeData(cellIdx, i).pos);
-            if(curMolIdx != cellIdx) // if molecule does not belong to current cell anymore
-            {
-                // write data to target end
-                moleculeData(curMolIdx, linkedCellNumMolecules(curMolIdx)) = moleculeData(cellIdx, i);
-                // increment target end
-                linkedCellNumMolecules(curMolIdx)++;
-                // delete molecule at own position
-                remove(cellIdx, i);
-                // decrement iterator as the molecule at position i is now new
-                i--;
-            }
-        }
-    }
-
     KOKKOS_FUNCTION void sort(const IndexConverter& indexConverter)
     {
         //find red-black cells
