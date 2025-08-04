@@ -12,7 +12,7 @@ public:
         this->domainSize = domainSize;
         this->numCellsPerDim = numCellsPerDim;
     }
-    int getIndex(double posx, double posy, double posz) const
+    KOKKOS_FUNCTION int getIndex(double posx, double posy, double posz) const
     {
         int xid = -1, yid = -1, zid = -1;
         posx -= (domainSize/numCellsPerDim);
