@@ -23,7 +23,7 @@ public:
         using pointer = value_type*;
         using reference = value_type&;
 public:
-        Iterator(pointer ptr) : _myPtr(ptr), _idx(0) {}
+        KOKKOS_FUNCTION Iterator(pointer ptr) : _myPtr(ptr), _idx(0) {}
 
         KOKKOS_INLINE_FUNCTION reference operator*() const { return *_myPtr;} 
         KOKKOS_INLINE_FUNCTION pointer operator->() { return _myPtr; }
@@ -42,8 +42,8 @@ private:
         unsigned int _idx;
     };
 
-    KOKKOS_INLINE_FUNCTION Iterator begin() { return Iterator(&moleculeData(0)); }
-    KOKKOS_INLINE_FUNCTION Iterator end() { return Iterator(&moleculeData(numMolecules())); }
+    KOKKOS_FUNCTION Iterator begin() { return Iterator(&moleculeData(0)); }
+    KOKKOS_FUNCTION Iterator end() { return Iterator(&moleculeData(numMolecules())); }
 
     KOKKOS_FUNCTION void insert(Molecule& molecule)
     {
