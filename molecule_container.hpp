@@ -48,6 +48,7 @@ public:
 
     void sort(const IndexConverter& indexConverter)
     {
+        Kokkos::fence();
         //find red-black cells
         for (int z = 0; z < 2; z++)
         {
@@ -98,7 +99,7 @@ public:
             }
             
         }
-        
+        Kokkos::fence();
     }
 
     void printData() const
