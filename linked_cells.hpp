@@ -12,7 +12,7 @@
 class LinkedCell
 {
 public:
-    KOKKOS_FUNCTION LinkedCell(Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> nMolecules, Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeSlice) 
+    KOKKOS_FUNCTION LinkedCell(Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> nMolecules, Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> moleculeSlice) 
         : numMolecules(nMolecules), moleculeData(moleculeSlice) {}
     
     class Iterator
