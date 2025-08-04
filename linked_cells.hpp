@@ -25,37 +25,37 @@ public:
 public:
         Iterator(pointer ptr) : _myPtr(ptr), _idx(0) {}
 
-        reference operator*() const { return *_myPtr;} 
-        pointer operator->() { return _myPtr; }
-        Iterator& operator++() { _myPtr++; _idx++; return *this; }
-        Iterator operator++(int) { Iterator temp = *this; ++(*this); _idx++; return temp; }
-        Iterator& operator--() { _myPtr--; _idx--; return *this; }
-        Iterator operator--(int) { Iterator temp = *this; --(*this); _idx--; return temp; }
+        KOKKOS_INLINE_FUNCTION reference operator*() const { return *_myPtr;} 
+        KOKKOS_INLINE_FUNCTION pointer operator->() { return _myPtr; }
+        KOKKOS_INLINE_FUNCTION Iterator& operator++() { _myPtr++; _idx++; return *this; }
+        KOKKOS_INLINE_FUNCTION Iterator operator++(int) { Iterator temp = *this; ++(*this); _idx++; return temp; }
+        KOKKOS_INLINE_FUNCTION Iterator& operator--() { _myPtr--; _idx--; return *this; }
+        KOKKOS_INLINE_FUNCTION Iterator operator--(int) { Iterator temp = *this; --(*this); _idx--; return temp; }
         
-        friend bool operator== (const Iterator& a, const Iterator& b) { return a._myPtr == b._myPtr; }
-        friend bool operator!= (const Iterator& a, const Iterator& b) { return a._myPtr != b._myPtr; }
+        KOKKOS_INLINE_FUNCTION friend bool operator== (const Iterator& a, const Iterator& b) { return a._myPtr == b._myPtr; }
+        KOKKOS_INLINE_FUNCTION friend bool operator!= (const Iterator& a, const Iterator& b) { return a._myPtr != b._myPtr; }
 
-        unsigned int getIndex() const { return _idx; }
+        KOKKOS_INLINE_FUNCTION unsigned int getIndex() const { return _idx; }
 
 private:
         pointer _myPtr;
         unsigned int _idx;
     };
 
-    Iterator begin() { return Iterator(&moleculeData(0)); }
-    Iterator end() { return Iterator(&moleculeData(numMolecules())); }
+    KOKKOS_INLINE_FUNCTION Iterator begin() { return Iterator(&moleculeData(0)); }
+    KOKKOS_INLINE_FUNCTION Iterator end() { return Iterator(&moleculeData(numMolecules())); }
 
-    void insert(Molecule& molecule)
+    KOKKOS_FUNCTION void insert(Molecule& molecule)
     {
         moleculeData(numMolecules()) = molecule;
         numMolecules() += 1;
     }
-    void remove(int moleculeIdx)
+    KOKKOS_FUNCTION void remove(int moleculeIdx)
     {
         moleculeData(moleculeIdx) = moleculeData(numMolecules() - 1);
         numMolecules() -= 1;
     }
-    void clear()
+    KOKKOS_FUNCTION void clear()
     {
         numMolecules() = 0;
     }

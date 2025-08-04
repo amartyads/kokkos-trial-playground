@@ -29,19 +29,19 @@ public:
         // new space created is filled with garbage data, so size of _linkedCell does not change
     }
 
-    void insert(int cellIdx, Molecule& molecule)
+    KOKKOS_FUNCTION void insert(int cellIdx, Molecule& molecule)
     {
         moleculeData(cellIdx, linkedCellNumMolecules(cellIdx)) = molecule;
         linkedCellNumMolecules(cellIdx) += 1;
     }
 
-    void remove(int cellIdx, int moleculeIdx)
+    KOKKOS_FUNCTION void remove(int cellIdx, int moleculeIdx)
     {
         moleculeData(cellIdx, moleculeIdx) = moleculeData(cellIdx, linkedCellNumMolecules(cellIdx) - 1);
         linkedCellNumMolecules(cellIdx) -= 1;
     }
 
-    void clearLinkedCell(int cellIdx)
+    KOKKOS_FUNCTION void clearLinkedCell(int cellIdx)
     {
         linkedCellNumMolecules(cellIdx) = 0;
     }
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
+    KOKKOS_INLINE_FUNCTION Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
 
     LinkedCell operator[](int idx) const
     {
