@@ -29,7 +29,7 @@ public:
             zspans.push_back(i);
         }
     }
-    int getIndex(double posx, double posy, double posz)
+    KOKKOS_FUNCTION int getIndex(double posx, double posy, double posz) const
     {
         int toRet = 0;
         int xid = -1, yid = -1, zid = -1;
@@ -42,15 +42,15 @@ public:
         }
         return xid + yid*numCellsPerDim + zid*numCellsPerDim*numCellsPerDim;
     }
-    int getIndex(double pos[3])
+    KOKKOS_FUNCTION int getIndex(double pos[3]) const
     {
         return getIndex(pos[0],pos[1], pos[2]);
     }
-    bool isInIndex(double posx, double posy, double posz, int index)
+    KOKKOS_FUNCTION bool isInIndex(double posx, double posy, double posz, int index) const
     {
         return getIndex(posx, posy, posz) == index;
     }
-    bool isInIndex(double pos[3], int index)
+    KOKKOS_FUNCTION bool isInIndex(double pos[3], int index) const
     {
         return isInIndex(pos[0], pos[1], pos[2], index);
     }

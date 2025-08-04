@@ -17,8 +17,8 @@
 class MoleculeContainer
 {
 public:
-    MoleculeContainer(int numCells, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCells(numCells), _cellSize(cellSize), _gen(gen), 
-        _dis(dis), moleculeData("moleculeData", numCells, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCells)
+    MoleculeContainer(int numCellsPerDim, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCellsPerDim(numCellsPerDim), _numCells(numCellsPerDim*numCellsPerDim*numCellsPerDim), _cellSize(cellSize), _gen(gen), 
+        _dis(dis), moleculeData("moleculeData", numCellsPerDim*numCellsPerDim*numCellsPerDim, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCellsPerDim*numCellsPerDim*numCellsPerDim)
         {}
 
     void grow(int cellSize)
@@ -46,7 +46,7 @@ public:
         linkedCellNumMolecules(cellIdx) = 0;
     }
 
-    void sort(int cellIdx, IndexConverter& indexConverter) //set all outgoing molecules
+    KOKKOS_FUNCTION void sort(int cellIdx, const IndexConverter& indexConverter) //set all outgoing molecules
     {
         for (size_t i = 0; i < linkedCellNumMolecules(cellIdx); i++)
         {
@@ -65,18 +65,40 @@ public:
         }
     }
 
-    void sort(IndexConverter& indexConverter)
+    KOKKOS_FUNCTION void sort(const IndexConverter& indexConverter)
     {
         //find red-black cells
-        for (size_t z = 0; z < 2; z++)
+        for (int z = 0; z < 2; z++)
         {
-            for (size_t y = 0; y < 2; y++)
+            for (int y = 0; y < 2; y++)
             {
-                for (size_t x = 0; x < 2; x++)
+                for (int x = 0; x < 2; x++)
                 {
-                    int lengthVector[] = {};
+                    const int lengthVector[3] = {(_numCellsPerDim + (_numCellsPerDim % 2) * (x == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (y == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (z == 0)) / 2};
+                    const int length = lengthVector[0] * lengthVector[1] * lengthVector[2];
+                    Kokkos::parallel_for(length, KOKKOS_LAMBDA(const unsigned int j) {
+                        // compute index of the current cell
+                        int index = 0;
+                        int helpIndex1 = j;
+                        int helpIndex2 = 0;
+                        // determine plane within traversed block
+                        helpIndex2 = helpIndex1 / (lengthVector[0] * lengthVector[1]);
+                        // save rest of index in helpIndex1
+                        helpIndex1 = helpIndex1 - helpIndex2 * (lengthVector[0] * lengthVector[1]);
+                        // compute contribution to index
+                        index += (0+ 2 * helpIndex2 + z) * _numCellsPerDim * _numCellsPerDim;
+                        // determine plane within traversed block
+                        helpIndex2 = helpIndex1 / lengthVector[0];
+                        // save rest of index in helpIndex1
+                        helpIndex1 = helpIndex1 - helpIndex2 * lengthVector[0];
+                        // compute contribution to index
+                        index += (0 + 2 * helpIndex2 + y) * _numCellsPerDim;
+                        // compute contribution for last dimension
+                        index += (0 + 2 * helpIndex1 + x);
+
+                        sort(index, indexConverter);
+                    });
                 }
-                
             }
             
         }
@@ -135,13 +157,14 @@ public:
         return LinkedCell(lcSizeSlice, lcMoleculeSlice);
     }
 
-    int getNumCells() const { return _numCells; }
+    KOKKOS_FUNCTION int getNumCells() const { return _numCells; }
 
     Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeData;
     Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> linkedCellNumMolecules;
 
 private:
     int _numCells;
+    int _numCellsPerDim;
     int _cellSize;
     std::mt19937 _gen;
     std::uniform_int_distribution<> _dis;
