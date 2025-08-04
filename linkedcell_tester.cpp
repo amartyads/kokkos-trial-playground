@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <random>
 
 #include <Kokkos_Core.hpp>
@@ -56,7 +57,9 @@ int main(int argc, char* argv[])
     std::cout << "fence--------------------" << std::endl;
     Kokkos::parallel_for(totNumCells, KOKKOS_LAMBDA(const unsigned int i)
     {
-        std::cout << "Thread num: " << i << std::endl;
+        std::stringstream ss;
+        ss << "Thread num: " << i << std::endl;
+        std::cout << ss.str();
         LinkedCell curCell = container[i];
         for (auto it = curCell.begin(); it != curCell.end(); ++it)
             (*it).f[0] = 69420;
