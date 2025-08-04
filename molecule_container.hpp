@@ -59,6 +59,7 @@ public:
                     const int lengthVector[3] = {(_numCellsPerDim + (_numCellsPerDim % 2) * (x == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (y == 0)) / 2, (_numCellsPerDim + (_numCellsPerDim % 2) * (z == 0)) / 2};
                     const int length = lengthVector[0] * lengthVector[1] * lengthVector[2];
                     const int numCellsPerDim = _numCellsPerDim;
+                    auto linkedCellLocal(linkedCellNumMolecules);
                     Kokkos::parallel_for(length, KOKKOS_LAMBDA(const unsigned int j) {
                         // compute index of the current cell
                         int index = 0;
@@ -79,7 +80,7 @@ public:
                         // compute contribution for last dimension
                         index += (0 + 2 * helpIndex1 + x);
 
-                        for (size_t i = 0; i < linkedCellNumMolecules(index); i++)
+                        for (size_t i = 0; i < linkedCellLocal(index); i++)
                         {
                             int curMolIdx = indexConverter.getIndex(moleculeData(index, i).pos);
                             if(curMolIdx != index) // if molecule does not belong to current cell anymore
