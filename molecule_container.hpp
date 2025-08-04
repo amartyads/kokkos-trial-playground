@@ -91,7 +91,8 @@ public:
                                 // increment target end
                                 linkedCellLocal(curMolIdx)++;
                                 // delete molecule at own position
-                                remove(index, i);
+                                moleculeDataLocal(index, i) = moleculeDataLocal(index, linkedCellLocal(index) - 1);
+                                linkedCellLocal(index) -= 1;
                                 // decrement iterator as the molecule at position i is now new
                                 i--;
                             }
