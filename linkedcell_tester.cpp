@@ -16,7 +16,9 @@ int main(int argc, char* argv[])
 
     std::mt19937 gen(1984);
     std::uniform_int_distribution<> dis(0, RAND_MAX);
-
+#ifdef KOKKOS_HAS_SHARED_SPACE
+    std::cout << "Has shared space" << std::endl;
+#endif
     int domainSizeVolume = 2;
     double cellSizeVolume = 1;
     int numCellsPerDim = static_cast<int>(domainSizeVolume/cellSizeVolume);

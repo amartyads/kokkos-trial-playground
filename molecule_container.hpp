@@ -149,15 +149,15 @@ public:
 
     KOKKOS_FUNCTION LinkedCell operator[](int idx) const
     {
-        Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
-        Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
+        Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
+        Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
         return LinkedCell(lcSizeSlice, lcMoleculeSlice);
     }
 
     KOKKOS_FUNCTION int getNumCells() const { return _numCells; }
 
-    Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> moleculeData;
-    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedHostPinnedSpace> linkedCellNumMolecules;
+    Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeData;
+    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> linkedCellNumMolecules;
 
 private:
     int _numCells;
