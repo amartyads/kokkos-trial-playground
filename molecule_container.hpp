@@ -150,11 +150,13 @@ public:
 
     KOKKOS_INLINE_FUNCTION Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
 
-    KOKKOS_FUNCTION LinkedCell operator[](int idx) const
+    KOKKOS_FUNCTION LinkedCell operator[](unsigned int idx) const
     {
-        Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
-        Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
-        return LinkedCell(lcSizeSlice, lcMoleculeSlice);
+        // Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
+        // Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
+        // return LinkedCell(lcSizeSlice, lcMoleculeSlice);
+
+        return LinkedCell(linkedCellNumMolecules, moleculeData, idx);
     }
 
     KOKKOS_FUNCTION int getNumCells() const { return _numCells; }

@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     int domainSizeVolume = 2;
     double cellSizeVolume = 1;
     int numCellsPerDim = static_cast<int>(domainSizeVolume/cellSizeVolume);
-    //int totNumCells = numCellsPerDim * numCellsPerDim * numCellsPerDim;
+    int totNumCells = numCellsPerDim * numCellsPerDim * numCellsPerDim;
     int cellSizeMolecules = 2;
     int extraCellSpaceFactor = 3;
 
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     Kokkos::fence();
     container.printData();
 
-    /**std::cout << "Iteration: " << std::endl;
+    std::cout << "Iteration: " << std::endl;
     LinkedCell cell = container[0];
     for(auto x: cell)
         std::cout << x.to_string() << " ";
@@ -51,9 +51,9 @@ int main(int argc, char* argv[])
     (*it).pos[1] = 1;
     (*it).pos[2] = 1;
     container.sort(indexConverter);
-    container.printData();**/
+    container.printData();
 
-    /**Molecule m(50,0.5,0.5,0.5);
+    Molecule m(50,0.5,0.5,0.5);
     cell.insert(m);
 
     std::cout << "fence--------------------" << std::endl;
@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
         for (auto it = curCell.begin(); it != curCell.end(); ++it)
             (*it).f[0] = 69420;
     });
-    container.printData();*/
+    container.printData();
 
     return 0;
 }

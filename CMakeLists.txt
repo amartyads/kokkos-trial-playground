@@ -5,7 +5,7 @@ set(Kokkos_COMMON_SOURCE_DIR $HOME/software/kokkos-4.6.02/install)
 
 find_package(Kokkos CONFIG)
 
-include_directories(/home/amartya/Work/kokkos-trial)
+include_directories(/home/user/Developer/kokkos-trial-playground)
 add_executable(linkedcell_experiments linkedcell_experiments.cpp)
 add_executable(linkedcell_experiments_parallel linkedcell_experiments_parallel.cpp)
 add_executable(linkedcell_benchmarks linkedcell_benchmarks.cpp)
