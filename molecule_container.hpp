@@ -156,13 +156,13 @@ public:
         // Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
         // return LinkedCell(lcSizeSlice, lcMoleculeSlice);
 
-        // LinkedCell* cell = new (&linkedCells(idx)) LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
-        // return *cell;
+        LinkedCell* cell = new (&linkedCells(idx)) LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
+        return *cell;
 
         // return LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
 
-        linkedCells(idx) = LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
-        return linkedCells(idx);
+        // linkedCells(idx) = LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
+        // return linkedCells(idx);
     }
 
     KOKKOS_FUNCTION int getNumCells() const { return _numCells; }

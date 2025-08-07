@@ -79,5 +79,5 @@ private:
 
     const Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeData;
     const Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* linkedCellNumMolecules;
-    unsigned int linkedCellIndex;
+    const unsigned int linkedCellIndex;
 };
