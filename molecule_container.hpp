@@ -150,7 +150,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
 
-    KOKKOS_FUNCTION LinkedCell& operator[](unsigned int idx)
+    KOKKOS_FUNCTION LinkedCell& operator[](unsigned int idx) const
     {
         // Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
         // Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
@@ -173,9 +173,9 @@ public:
         auto linkedCells2 = linkedCells;
         Kokkos::parallel_for(linkedCellNumMolecules.size(), KOKKOS_LAMBDA(const unsigned int i)
         {
-            // LinkedCell curCell = container[i];
-            linkedCells2(i) = LinkedCell(&linkedCellNumMolecules, &moleculeData, i);
-            auto curCell = linkedCells2(i);
+            LinkedCell curCell = container[i];
+            // linkedCells2(i) = LinkedCell(&linkedCellNumMolecules, &moleculeData, i);
+            // auto curCell = linkedCells2(i);
 
             for (auto it = curCell.begin(); it != curCell.end(); ++it)
                 (*it).f[0] = 69420;

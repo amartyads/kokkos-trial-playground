@@ -14,7 +14,7 @@ class LinkedCell
 public:
     KOKKOS_FUNCTION LinkedCell() : linkedCellNumMolecules(NULL), moleculeData(NULL), linkedCellIndex(0) {}
 
-    KOKKOS_FUNCTION LinkedCell(Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* nMolecules, Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeSlice, unsigned int cellIndex) 
+    KOKKOS_FUNCTION LinkedCell(const Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* nMolecules, const Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeSlice, unsigned int cellIndex) 
         : linkedCellNumMolecules(nMolecules), moleculeData(moleculeSlice), linkedCellIndex(cellIndex) {}
     
     class Iterator
@@ -77,7 +77,7 @@ private:
         return to_ret.str();
     }
 
-    Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeData;
-    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* linkedCellNumMolecules;
+    const Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeData;
+    const Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* linkedCellNumMolecules;
     unsigned int linkedCellIndex;
 };
