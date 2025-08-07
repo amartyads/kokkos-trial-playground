@@ -169,9 +169,14 @@ public:
 
     
     void testTestData() {
+        MoleculeContainer container = (*this);
+        auto linkedCells2 = linkedCells;
         Kokkos::parallel_for(linkedCellNumMolecules.size(), KOKKOS_LAMBDA(const unsigned int i)
         {
-            LinkedCell curCell = (*this)[i];
+            // LinkedCell curCell = container[i];
+            linkedCells2(i) = LinkedCell(&linkedCellNumMolecules, &moleculeData, i);
+            auto curCell = linkedCells2(i);
+
             for (auto it = curCell.begin(); it != curCell.end(); ++it)
                 (*it).f[0] = 69420;
         });
