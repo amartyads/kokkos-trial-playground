@@ -57,12 +57,7 @@ int main(int argc, char* argv[])
     cell.insert(m);
 
     std::cout << "fence--------------------" << std::endl;
-    Kokkos::parallel_for(totNumCells, KOKKOS_LAMBDA(const unsigned int i)
-    {
-        LinkedCell curCell = container[i];
-        for (auto it = curCell.begin(); it != curCell.end(); ++it)
-            (*it).f[0] = 69420;
-    });
+    container.testTestData();
     container.printData();
 
     return 0;

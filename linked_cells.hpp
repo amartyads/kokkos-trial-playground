@@ -12,7 +12,9 @@
 class LinkedCell
 {
 public:
-    KOKKOS_FUNCTION LinkedCell(Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> nMolecules, Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeSlice, unsigned int cellIndex) 
+    KOKKOS_FUNCTION LinkedCell() : linkedCellNumMolecules(NULL), moleculeData(NULL), linkedCellIndex(0) {}
+
+    KOKKOS_FUNCTION LinkedCell(Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* nMolecules, Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeSlice, unsigned int cellIndex) 
         : linkedCellNumMolecules(nMolecules), moleculeData(moleculeSlice), linkedCellIndex(cellIndex) {}
     
     class Iterator
@@ -42,30 +44,30 @@ private:
         unsigned int _idx;
     };
 
-    KOKKOS_FUNCTION Iterator begin() { return Iterator(&moleculeData(linkedCellIndex, 0)); }
-    KOKKOS_FUNCTION Iterator end() { return Iterator(&moleculeData(linkedCellIndex, numMolecules())); }
+    KOKKOS_FUNCTION Iterator begin() { return Iterator(&(*moleculeData)(linkedCellIndex, 0)); }
+    KOKKOS_FUNCTION Iterator end() { return Iterator(&(*moleculeData)(linkedCellIndex, numMolecules())); }
 
     KOKKOS_FUNCTION unsigned int numMolecules() const {
-        return linkedCellNumMolecules(linkedCellIndex);
+        return (*linkedCellNumMolecules)(linkedCellIndex);
     }
 
     KOKKOS_FUNCTION void changeMoleculeCount(int by) {
-        linkedCellNumMolecules(linkedCellIndex) += by;
+        (*linkedCellNumMolecules)(linkedCellIndex) += by;
     }
 
     KOKKOS_FUNCTION void insert(Molecule& molecule)
     {
-        moleculeData(linkedCellIndex, numMolecules()) = molecule;
+        (*moleculeData)(linkedCellIndex, numMolecules()) = molecule;
         changeMoleculeCount(+1);
     }
     KOKKOS_FUNCTION void remove(int moleculeIdx)
     {
-        moleculeData(linkedCellIndex, moleculeIdx) = moleculeData(linkedCellIndex, numMolecules() - 1);
+        (*moleculeData)(linkedCellIndex, moleculeIdx) = (*moleculeData)(linkedCellIndex, numMolecules() - 1);
         changeMoleculeCount(-1);
     }
     KOKKOS_FUNCTION void clear()
     {
-        linkedCellNumMolecules(linkedCellIndex) = 0;
+        (*linkedCellNumMolecules)(linkedCellIndex) = 0;
     }
 
     std::string to_string() const
@@ -75,7 +77,7 @@ private:
         return to_ret.str();
     }
 
-    Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeData;
-    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> linkedCellNumMolecules;
+    Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace>* moleculeData;
+    Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace>* linkedCellNumMolecules;
     unsigned int linkedCellIndex;
 };

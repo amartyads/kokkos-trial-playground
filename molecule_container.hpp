@@ -18,7 +18,7 @@ class MoleculeContainer
 {
 public:
     MoleculeContainer(int numCellsPerDim, int cellSize, std::mt19937 gen, std::uniform_int_distribution<> dis) : _numCellsPerDim(numCellsPerDim), _numCells(numCellsPerDim*numCellsPerDim*numCellsPerDim), _cellSize(cellSize), _gen(gen), 
-        _dis(dis), moleculeData("moleculeData", numCellsPerDim*numCellsPerDim*numCellsPerDim, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCellsPerDim*numCellsPerDim*numCellsPerDim)
+        _dis(dis), moleculeData("moleculeData", numCellsPerDim*numCellsPerDim*numCellsPerDim, cellSize), linkedCellNumMolecules("linkedCellNumMolecules", numCellsPerDim*numCellsPerDim*numCellsPerDim), linkedCells("linkedCells", numCellsPerDim*numCellsPerDim*numCellsPerDim)
         {}
 
     void grow(int cellSize)
@@ -150,19 +150,37 @@ public:
 
     KOKKOS_INLINE_FUNCTION Molecule& getMoleculeAt(int i, int j) const { return moleculeData(i,j); }
 
-    KOKKOS_FUNCTION LinkedCell operator[](unsigned int idx) const
+    KOKKOS_FUNCTION LinkedCell& operator[](unsigned int idx)
     {
         // Kokkos::View<Molecule*, Kokkos::LayoutRight, Kokkos::SharedSpace> lcMoleculeSlice(moleculeData, idx, Kokkos::ALL);
         // Kokkos::View<int, Kokkos::LayoutRight, Kokkos::SharedSpace> lcSizeSlice(linkedCellNumMolecules, idx);
         // return LinkedCell(lcSizeSlice, lcMoleculeSlice);
 
-        return LinkedCell(linkedCellNumMolecules, moleculeData, idx);
+        // LinkedCell* cell = new (&linkedCells(idx)) LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
+        // return *cell;
+
+        // return LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
+
+        linkedCells(idx) = LinkedCell(&linkedCellNumMolecules, &moleculeData, idx);
+        return linkedCells(idx);
     }
 
     KOKKOS_FUNCTION int getNumCells() const { return _numCells; }
 
+    
+    void testTestData() {
+        Kokkos::parallel_for(linkedCellNumMolecules.size(), KOKKOS_LAMBDA(const unsigned int i)
+        {
+            LinkedCell curCell = (*this)[i];
+            for (auto it = curCell.begin(); it != curCell.end(); ++it)
+                (*it).f[0] = 69420;
+        });
+    }
+
     Kokkos::View<Molecule**, Kokkos::LayoutRight, Kokkos::SharedSpace> moleculeData;
     Kokkos::View<int*, Kokkos::LayoutRight, Kokkos::SharedSpace> linkedCellNumMolecules;
+    Kokkos::View<LinkedCell*, Kokkos::LayoutRight, Kokkos::SharedSpace> linkedCells;
+
 
 private:
     int _numCells;
